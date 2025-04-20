@@ -142,6 +142,8 @@ function showQuizButtons(){
     });
 }
 
+var currentQuestionIndex = 0
+
 function loadQuiz(quizId){
     var quizzes = JSON.parse(localStorage.getItem("quizzes")) || [];
     var selectedQuiz = quizzes.find(function (quiz){
@@ -178,3 +180,23 @@ function loadQuiz(quizId){
         });
     }
 }
+
+
+document.getElementById("nextBtn").addEventListener("click",function(){
+    var answers = [];
+    var questionElements = document.querySelectorAll(".question");
+
+    questionElements.forEach(function(questionElement, index){
+        var selectedChoice = questionElement.querySelector('input[type="radio"]:checked');
+        if (selectedChoice){
+            answers.push(parseInt(selectedChoice.value));
+        }else {
+            answers.push(null);
+        }
+    });
+
+    console.log(answers);
+
+});
+
+
