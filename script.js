@@ -98,28 +98,31 @@ function addSampleQuizzes(){
     var quizzes = [
         {
             id:1,  title:"HTML Basics", questions: [{question: "What is HTML?", choices: ["Hypertext Markup Language", "Hello Thanks Mister Lonely", "IDK"], correct: 0 },
-            { question: "What does h1 stands for?", choices: ["Heading 1", "Horse 1", "Hello 1"], correct: 0 }]
+            { question: "What does h1 stands for?", choices: ["Heading 1", "Horse 1", "Hello 1"], correct: 0 }, {question: "What is Href?", choices: ["Hypertext Reference", "Hypertext Recursion Format", "High Resolution File"], correct: 0}
+        ]
            
         },
         {
             id:2, title: "General Knowledge",
              questions: [
                 { question: "What is the capital of France?", choices: ["Berlin", "Madrid", "Paris"], correct: 2 },
-                { question: "Which planet is known as the Red Planet?", choices: ["Earth", "Mars", "Jupiter"], correct: 1 }
+                { question: "Which planet is known as the Red Planet?", choices: ["Earth", "Mars", "Jupiter"], correct: 1 },
+                { question: "Where is Lebanon located", choices: ["Africa", "South Asia", "East Asia"], correct: 2 }
             ]
         },
         {
             id: 3,
             title: "Sample Quiz", questions: [
                 { question: "What is 2 + 2?", choices: ["3", "4", "5"], correct: 1 },
-                { question: "What is the color of the sky?", choices: ["Blue", "Red", "Green"], correct: 0 }
+                { question: "What is the color of the sky?", choices: ["Blue", "Red", "Green"], correct: 0 },
+                { question: "Which of these is not a footballer?", choices: ["Ronaldo", "Lamine", "Salem"], correct: 2 }
             ]
         }
     ];
 
     localStorage.setItem("quizzes", JSON.stringify(quizzes));
 }
-
+    localStorage.removeItem("quizzes");
     if(!localStorage.getItem("quizzes")){
         addSampleQuizzes();
     }
@@ -142,61 +145,109 @@ function showQuizButtons(){
     });
 }
 
-var currentQuestionIndex = 0
+
 
 function loadQuiz(quizId){
     var quizzes = JSON.parse(localStorage.getItem("quizzes")) || [];
-    var selectedQuiz = quizzes.find(function (quiz){
+    selectedQuiz = quizzes.find(function (quiz){
         return quiz.id === quizId;
     });
 
-    if (selectedQuiz) {
+    if (selectedQuiz){
         document.getElementById("quizTitle").textContent = selectedQuiz.title;
+        currentQuestionIndex = 0;
+        userAnswers = new Array (selectedQuiz.questions.length).fill(null);
 
-        var questionContainer = document.getElementById("questionContainer");
-        questionContainer.innerHTML = "";
+        showQuestion();
 
-        selectedQuiz.questions.forEach(function(question, index){
-            var questionElement = document.createElement("div");
-            questionElement.classList.add("question");
-
-            var questionText = document.createElement("p");
-            questionText.textContent = (index +1) + "." + question.question;
-
-            questionElement.appendChild(questionText);
-
-            question.choices.forEach(function (choice, choiceIndex){
-                var label = document.createElement("label");
-                var input = document.createElement("input");
-                input.type = "radio";
-                input.name = "question" + index;
-                input.value = choiceIndex;
-
-                label.appendChild(input);
-                label.appendChild(document.createTextNode(choice));
-                questionElement.appendChild(label);
-            });
-            questionContainer.appendChild(questionElement);
-        });
+        document.getElementById("nextBtn").style.display = "inline-block";
+        document.getElementById("submitBtn").style.display = "none";
     }
 }
 
+function showQuestion(){
 
-document.getElementById("nextBtn").addEventListener("click",function(){
-    var answers = [];
-    var questionElements = document.querySelectorAll(".question");
+    var questionContainer = document.getElementById("questionContainer");
+    questionContainer.innerHTML = "";
 
-    questionElements.forEach(function(questionElement, index){
-        var selectedChoice = questionElement.querySelector('input[type="radio"]:checked');
-        if (selectedChoice){
-            answers.push(parseInt(selectedChoice.value));
-        }else {
-            answers.push(null);
+    var question = selectedQuiz.questions[currentQuestionIndex];
+
+    var questionElement = document.createElement("div");
+    questionElement.classList.add("question");
+
+    var questionText = document.createElement("p");
+    questionText.textContent = (currentQuestionIndex +1) + "." + question.question;
+    questionElement.appendChild(questionText);
+
+    question.choices.forEach(function(choice, index) {
+        var label = document.createElement("label");
+        var input = document.createElement("input");
+        input.type = "radio";
+        input.name = "choice";
+        input.value = index;
+
+        if (userAnswers[currentQuestionIndex] === index){
+            input.checked = true;
+        }
+
+        label.appendChild(input);
+        label.appendChild(document.createTextNode(choice));
+        questionElement.appendChild(label);
+    });
+
+    questionContainer.appendChild(questionElement);
+
+    // Control button visibility
+    if (currentQuestionIndex === selectedQuiz.questions.length - 1) {
+        document.getElementById("nextBtn").style.display = "none";
+        document.getElementById("submitBtn").style.display = "inline-block";
+    } else {
+        document.getElementById("nextBtn").style.display = "inline-block";
+        document.getElementById("submitBtn").style.display = "none";
+    }
+
+    document.getElementById("resultContainer").style.display = "none";
+    }
+
+
+var currentQuestionIndex = 0;
+var selectedQuiz = null;
+var userAnswers = [];
+
+
+
+
+document.getElementById("nextBtn").addEventListener("click", function() {
+    var selectedChoice = document.querySelector('input[name="choice"]:checked');
+    if (selectedChoice) {
+        userAnswers[currentQuestionIndex] = parseInt(selectedChoice.value);
+    } else {
+        userAnswers[currentQuestionIndex] = null;
+    }
+
+    if (currentQuestionIndex < selectedQuiz.questions.length - 1) {
+        currentQuestionIndex++;
+        showQuestion();
+    }
+});
+
+document.getElementById("submitBtn").addEventListener("click", function() {
+    var selectedChoice = document.querySelector('input[name="choice"]:checked');
+    if (selectedChoice) {
+        userAnswers[currentQuestionIndex] = parseInt(selectedChoice.value);
+    }
+
+    var correctAnswers = 0;
+    selectedQuiz.questions.forEach(function(question, index) {
+        if (userAnswers[index] === question.correct) {
+            correctAnswers++;
         }
     });
 
-    console.log(answers);
+    var resultContainer = document.getElementById("resultContainer");
+    resultContainer.innerHTML = "You scored " + correctAnswers + " out of " + selectedQuiz.questions.length;
+    resultContainer.style.display = "block";
 
+    document.getElementById("nextBtn").style.display = "none";
+    document.getElementById("submitBtn").style.display = "none";
 });
-
-
