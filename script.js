@@ -23,3 +23,37 @@ document.getElementById("loginBtn").addEventListener("click",function(){
 document.getElementById("logoutBtn").addEventListener("click", function()  {
     showSection("authPage");
 })
+
+
+document.getElementById("registerBtn").addEventListener("click", function() {
+    registerUser();
+});
+
+function registerUser(){
+
+    var email = document.getElementById("email").value;
+    var password = document.getElementById("password").value;
+
+    if (!email || !password){
+        alert("Please enter both email and password.");
+        return;
+    }
+
+    var users = JSON.parse(localStorage.getItem("users")) || [];
+
+    var userExists = users.find(function(user){
+        return user.email === email;
+    });
+
+
+if (userExists){
+    alert("User already exist. Please login.");
+    return;
+}
+
+users.push({email: email, password: password});
+localStorage.setItem("users", JSON.stringify(users));
+
+alert("Registration successful");
+
+}
