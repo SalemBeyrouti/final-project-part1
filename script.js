@@ -1,3 +1,5 @@
+var loggedInUser = null;
+
 function showSection(sectionid){
     const pages = ["authPage","homePage","quizPage","dashBoardPage"];
 
@@ -10,6 +12,43 @@ function showSection(sectionid){
         }
     
     });
+}
+
+function showDashboard(){
+    if(loggedInUser && loggedInUser.isAdmin){
+        var users = JSON.parse(localStorage.getItem("users")) || [];
+        var quizzes = JSON.parse(localStorage.getItem("quizzes")) || [];
+
+        var tableBody = document.getElementById("dashboardTable");
+        tableBody.innerHTML = "";
+
+        users.forEach(function(user) {
+            if (user.scores && Array.isArray(user.scores)){
+                user.scores.forEach(function(scoreEntry){
+                    var quiz = quizzes.find(q => q.id === scoreEntry.quizId);
+                    var quizTitle = quiz ? quiz.title : "Unknown";
+               
+                
+
+                    var row = document.createElement("tr");
+                    row.innerHTML = `
+                        <td>${user.email}</td>
+                         <td>${scoreEntry.score}</td>
+                        <td>${quizTitle}</td>
+                      `;
+                     tableBody.appendChild(row);
+                });
+            }
+                    
+                
+        
+        });
+        
+        showSection("dashBoardPage");
+
+    } else {
+        alert("Only admin can access the dashboard.");
+    }
 }
 
 showSection ("authPage");
@@ -30,7 +69,8 @@ document.getElementById("loginBtn").addEventListener("click", function(){
     }
 
     if (emailInput === "admin@quiz.com" && passwordInput === "admin123"){
-        showSection("dashBoardPage");
+        loggedInUser = {email: emailInput, isAdmin: true};
+        showDashboard();
         return;
     }
 
@@ -43,6 +83,7 @@ document.getElementById("loginBtn").addEventListener("click", function(){
     });
 
     if (matchedUser){
+        loggedInUser = matchedUser;
         document.getElementById("userEmail").textContent = emailInput;
         showSection("homePage");
         showQuizButtons();
@@ -197,7 +238,7 @@ function showQuestion(){
 
     questionContainer.appendChild(questionElement);
 
-    // Control button visibility
+   
     if (currentQuestionIndex === selectedQuiz.questions.length - 1) {
         document.getElementById("nextBtn").style.display = "none";
         document.getElementById("submitBtn").style.display = "inline-block";
@@ -238,16 +279,62 @@ document.getElementById("submitBtn").addEventListener("click", function() {
     }
 
     var correctAnswers = 0;
-    selectedQuiz.questions.forEach(function(question, index) {
-        if (userAnswers[index] === question.correct) {
+    selectedQuiz.questions.forEach(function(question, index){
+        if (userAnswers[index] === question.correct){
             correctAnswers++;
         }
-    });
+    })
+    if (loggedInUser && !loggedInUser.isAdmin){
+        var users = JSON.parse(localStorage.getItem("users")) || [];
 
+        var userIndex = users.findIndex(function(user){
+            return user.email === loggedInUser.email;
+        });
+
+        if (userIndex !== -1) {
+            if (!users[userIndex].scores){
+                users[userIndex].scores = [];
+            }
+
+            var existing = users[userIndex].scores.findIndex(s => s.quizId === selectedQuiz.id);
+            if (existing !== -1){
+                users[userIndex].scores[existing].score = correctAnswers;
+            } else {
+                users[userIndex].scores.push({
+                    quizId: selectedQuiz.id,
+                    score: correctAnswers
+                });
+            }
+
+            
+            
+            localStorage.setItem("users", JSON.stringify(users));
+        }
+    }
     var resultContainer = document.getElementById("resultContainer");
     resultContainer.innerHTML = "You scored " + correctAnswers + " out of " + selectedQuiz.questions.length;
     resultContainer.style.display = "block";
 
     document.getElementById("nextBtn").style.display = "none";
     document.getElementById("submitBtn").style.display = "none";
+
+    document.getElementById("backToQuizzesBtn").style.display = "inline-block";
+
+    
+
+    });
+    
+
+    
+
+
+document.getElementById("backToQuizzesBtn").addEventListener("click", function(){
+    showSection("homePage");
+    document.getElementById("resultContainer").style.display = "none";
+    this.style.display= "none";
 });
+
+document.getElementById("backToHomeBtn").addEventListener("click", function(){
+    showSection("homePage");
+});
+
