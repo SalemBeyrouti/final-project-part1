@@ -14,10 +14,42 @@ function showSection(sectionid){
 
 showSection ("authPage");
 
-document.getElementById("loginBtn").addEventListener("click",function(){
-    const emailInput = document.getElementById("email").value;
-    document.getElementById("userEmail").textContent = emailInput;
-    showSection("homePage");
+// document.getElementById("loginBtn").addEventListener("click",function(){
+//     const emailInput = document.getElementById("email").value;
+//     document.getElementById("userEmail").textContent = emailInput;
+//     showSection("homePage");
+// });
+
+document.getElementById("loginBtn").addEventListener("click", function(){
+    var emailInput = document.getElementById("email").value;
+    var passwordInput = document.getElementById("password").value;
+
+    if (!emailInput || !passwordInput) {
+        alert ("Please enter both email and password.");
+        return;
+    }
+
+    if (emailInput === "admin@quiz.com" && passwordInput === "admin123"){
+        showSection("dashBoardPage");
+        return;
+    }
+
+    var users = JSON.parse(localStorage.getItem("users")) || [];
+
+    var matchedUser = users.find(function(user){
+
+        return user.email === emailInput && user.password === passwordInput;
+
+    });
+
+    if (matchedUser){
+        document.getElementById("userEmail").textContent = emailInput;
+        showSection("homePage");
+    } else{
+        alert("Invalid credentials. Please register or try again.");
+    }
+
+
 });
 
 document.getElementById("logoutBtn").addEventListener("click", function()  {
