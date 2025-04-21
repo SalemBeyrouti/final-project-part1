@@ -14,42 +14,43 @@ function showSection(sectionid){
     });
 }
 
-function showDashboard(){
-    if(loggedInUser && loggedInUser.isAdmin){
-        var users = JSON.parse(localStorage.getItem("users")) || [];
-        var quizzes = JSON.parse(localStorage.getItem("quizzes")) || [];
-
-        var tableBody = document.getElementById("dashboardTable");
-        tableBody.innerHTML = "";
-
-        users.forEach(function(user) {
-            if (user.scores && Array.isArray(user.scores)){
-                user.scores.forEach(function(scoreEntry){
-                    var quiz = quizzes.find(q => q.id === scoreEntry.quizId);
-                    var quizTitle = quiz ? quiz.title : "Unknown";
-               
-                
-
-                    var row = document.createElement("tr");
-                    row.innerHTML = `
-                        <td>${user.email}</td>
-                         <td>${scoreEntry.score}</td>
-                        <td>${quizTitle}</td>
-                      `;
-                     tableBody.appendChild(row);
-                });
-            }
-                    
-                
-        
-        });
-        
-        showSection("dashBoardPage");
-
+function showDashboard() {
+    if (loggedInUser && loggedInUser.isAdmin) {
+      var users = JSON.parse(localStorage.getItem("users")) || [];
+  
+      var tableBody = document.getElementById("dashboardTable");
+      tableBody.innerHTML = "";
+  
+      const usersWithTotalScores = users.map(user => {
+        const total = user.scores && Array.isArray(user.scores)
+          ? user.scores.reduce((sum, s) => sum + s.score, 0)
+          : 0;
+        return { email: user.email, totalScore: total };
+      });
+  
+      const sortSelect = document.getElementById("sortSelect");
+      const sortOption = sortSelect ? sortSelect.value : "scoreDesc";
+  
+      if (sortOption === "scoreAsc") {
+        usersWithTotalScores.sort((a, b) => a.totalScore - b.totalScore);
+      } else {
+        usersWithTotalScores.sort((a, b) => b.totalScore - a.totalScore);
+      }
+  
+      usersWithTotalScores.forEach(user => {
+        var row = document.createElement("tr");
+        row.innerHTML = `
+          <td>${user.email}</td>
+          <td>${user.totalScore}</td>
+        `;
+        tableBody.appendChild(row);
+      });
+  
+      showSection("dashBoardPage");
     } else {
-        alert("Only admin can access the dashboard.");
+      alert("Only admin can access the dashboard.");
     }
-}
+  }
 
 showSection ("authPage");
 
@@ -134,29 +135,46 @@ alert("Registration successful");
 
 
 
-function addSampleQuizzes(){
-
+function addSampleQuizzes() {
     var quizzes = [
         {
-            id:1,  title:"HTML Basics", questions: [{question: "What is HTML?", choices: ["Hypertext Markup Language", "Hello Thanks Mister Lonely", "IDK"], correct: 0 },
-            { question: "What does h1 stands for?", choices: ["Heading 1", "Horse 1", "Hello 1"], correct: 0 }, {question: "What is Href?", choices: ["Hypertext Reference", "Hypertext Recursion Format", "High Resolution File"], correct: 0}
-        ]
-           
+            id: 1,
+            title: "HTML Basics",
+            questions: [
+                { question: "What is HTML?", choices: ["Hypertext Markup Language", "Hello Thanks Mister Lonely", "IDK", "HyperText Medium Link"], correct: 0 },
+                { question: "What does h1 stand for?", choices: ["Heading 1", "Horse 1", "Hello 1", "Happy1"], correct: 0 },
+                { question: "What is Href?", choices: ["Hypertext Reference", "Hypertext Recursion Format", "High Resolution File", "Hypertext file"], correct: 0 },
+                { question: "Which of these is a valid HTML element?", choices: ["<header>", "<script>", "<section>", "<div>"], correct: 3 }
+            ]
         },
         {
-            id:2, title: "General Knowledge",
-             questions: [
-                { question: "What is the capital of France?", choices: ["Berlin", "Madrid", "Paris"], correct: 2 },
-                { question: "Which planet is known as the Red Planet?", choices: ["Earth", "Mars", "Jupiter"], correct: 1 },
-                { question: "Where is Lebanon located", choices: ["Africa", "South Asia", "East Asia"], correct: 2 }
+            id: 2,
+            title: "General Knowledge",
+            questions: [
+                { question: "What is the capital of France?", choices: ["Berlin", "Madrid", "Paris", "London"], correct: 2 },
+                { question: "Which planet is known as the Red Planet?", choices: ["Earth", "Mars", "Jupiter", "Saturn"], correct: 1 },
+                { question: "Where is Lebanon located?", choices: ["Africa", "South Asia", "East Asia", "MiddleEast"], correct: 3 },
+                { question: "Who wrote 'Romeo and Juliet'?", choices: ["Jebran Khalil Jebran", "Wadi3 l Shekh", "William Shakespeare", "Robert Downey Jr"], correct: 2 }
             ]
         },
         {
             id: 3,
-            title: "Sample Quiz", questions: [
-                { question: "What is 2 + 2?", choices: ["3", "4", "5"], correct: 1 },
-                { question: "What is the color of the sky?", choices: ["Blue", "Red", "Green"], correct: 0 },
-                { question: "Which of these is not a footballer?", choices: ["Ronaldo", "Lamine", "Salem"], correct: 2 }
+            title: "Mathematics",
+            questions: [
+                { question: "What is 2 * 12?", choices: ["22", "20", "14", "24"], correct: 3 },
+                { question: "What is the square root of 16?", choices: ["4", "1", "3", "8"], correct: 0 },
+                { question: "What is 10 * -10?", choices: ["100", "20", "-20", "-100"], correct: 3 },
+                { question: "What is the Area of a circle?", choices: ["2*pi*r", "pi*r", "pi*r2", "r*r"], correct: 2 }
+            ]
+        },
+        {
+            id: 4,
+            title: "Science",
+            questions: [
+                { question: "What is the chemical symbol for water?", choices: ["O2", "CO2", "H2O", "NaCl"], correct: 2 },
+                { question: "What is the boiling point of water?", choices: ["90°C", "100°C", "110°C", "120°C"], correct: 1 },
+                { question: "Which planet is closest to the sun?", choices: ["Venus", "Earth", "Mercury", "Mars"], correct: 2 },
+                { question: "What is the main gas in Earth's atmosphere?", choices: ["Oxygen", "Carbon Dioxide", "Nitrogen", "Hydrogen"], correct: 2 }
             ]
         }
     ];
@@ -338,3 +356,6 @@ document.getElementById("backToHomeBtn").addEventListener("click", function(){
     showSection("homePage");
 });
 
+document.getElementById("sortSelect").addEventListener("change", function () {
+    showDashboard();
+  });

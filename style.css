@@ -162,3 +162,17 @@ input[type="radio"] {
     text-align: center;
     color: #8458B3;
 }
+
+.dashboard-container {
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 30px;
+    color: #8458B3;
+  }
+  
+  .user-score {
+    background: #e0e8eb;
+    margin: 10px 0;
+    padding: 15px;
+    border-radius: 10px;
+  }

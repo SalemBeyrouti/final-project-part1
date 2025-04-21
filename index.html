@@ -65,20 +65,19 @@
             <h2>Admin Dashboard</h2>
 
             <div id="filters">
-                <label>Sort by:
-                    <select>
+                <label for="sortSelect">Sort by:</label>
+                    <select id="sortSelect">
                         <option value="scoreDesc">Highest Score</option>
                         <option value="scoreAsc">Lowest Score</option>
                     </select>
-                </label>
+                
             </div>
 
             <table border="1">
                 <thead>
                     <tr>
                         <th>Email</th>
-                        <th>Score</th>
-                        <th>Quiz Name</th>
+                        <th>Total Score</th>
                  </tr>
                 </thead>
                 <tbody id="dashboardTable">
