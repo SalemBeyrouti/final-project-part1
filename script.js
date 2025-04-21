@@ -54,11 +54,6 @@ function showDashboard() {
 
 showSection ("authPage");
 
-// document.getElementById("loginBtn").addEventListener("click",function(){
-//     const emailInput = document.getElementById("email").value;
-//     document.getElementById("userEmail").textContent = emailInput;
-//     showSection("homePage");
-// });
 
 document.getElementById("loginBtn").addEventListener("click", function(){
     var emailInput = document.getElementById("email").value;
